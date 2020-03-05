@@ -1,0 +1,28 @@
+.Iput
+{
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+}
+.Lael
+{
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+.IputEle
+{
+    outline: none;
+    border:19px solid #ccc;
+    background-color: white;
+    font: inherit;
+    padding: 6px 10px;
+    display:block;
+    width: 100%;
+    box-sizing: border-box;
+}
+.IputEle:focus{
+    outline: none;
+    background-color: #ccc;
+
+}

@@ -4,34 +4,73 @@ import Button from '../../../components/UI/Button/Button';
 import Loader from '../../../components/UI/loader/loader';
 import classes from './CotactData.css';
 import axios from '../../../axios-order';
-
+import Iput from '../../../components/UI/Iput/Iput'
 class CotactData extends Component {
     state = {
-        name: '',
-        email: '',
-        address: {
-            street: '',
-            postalCode: ''
-        },
-        load: false
-    }
+        orderForm:
+        {
+            
+                name:{
+                    elementType:'input',
+                    elementConfig:{
+                        type:'text',
+                        placeholder:'Your name'
+                    },
+                    value:''
+                } ,
+                street: {
+                    elementType:'input',
+                    elementConfig:{
+                        type:'text',
+                        placeholder:'Your street'
+                    },
+                    value:''
+                } ,
+                zipCode: {
+                    elementType:'input',
+                    elementConfig:{
+                        type:'text',
+                        placeholder:'Your ZIP CODE'
+                    },
+                    value:''
+                } ,
+                country: {
+                    elementType:'input',
+                    elementConfig:{
+                        type:'text',
+                        placeholder:'Your coutry'
+                    },
+                    value:''
+                } ,
+                email: {
+                    elementType:'input',
+                    elementConfig:{
+                        type:'email',
+                        placeholder:'Your mail-id'
+                    },
+                    value:''
+                } ,
+                deliveryMethod: {
+                    elementType:'select',
+                    elementConfig:{
+                       options:[
+                           {value:'fastest',displayValue:'Fastest'},
+                       {value:'cheapest',displayValue:'Cheapest'}
+                    ]
+                    },
+                    value:''
+                } ,
 
+        },
+        load:false
+    }
     orderHandler = ( event ) => {
         event.preventDefault();
         this.setState( { load: true } );
         const order = {
             igrediets: this.props.igrediets,
             price: this.props.price,
-            customer: {
-                name: 'Max Schwarzmüller',
-                address: {
-                    street: 'Teststreet 1',
-                    zipCode: '41351',
-                    country: 'Germany'
-                },
-                email: 'test@test.com'
-            },
-            deliveryMethod: 'fastest'
+            
         }
         axios.post( '/orders.json', order )
             .then( response => {
@@ -42,14 +81,33 @@ class CotactData extends Component {
                 this.setState( { load: false } );
             } );
     }
+    inputChangeHandler=(event)=>
+    {
+
+    }
 
     render () {
+        const formElementsArray=[];
+        for(let key in this.state.orderForm)
+        {
+            formElementsArray.push({
+                id:key,
+                config:this.state.orderForm[key]
+            })
+        }
         let form = (
             <form>
-                <input className={classes.Input} type="text" name="name" placeholder="Your Name" />
-                <input className={classes.Input} type="email" name="email" placeholder="Your Mail" />
-                <input className={classes.Input} type="text" name="street" placeholder="Street" />
-                <input className={classes.Input} type="text" name="postal" placeholder="Postal Code" />
+                
+                {formElementsArray.map(formElement=>(
+                    <Iput 
+                    key={formElement.id}
+                    elementType= {formElement.config.elementType}
+                    elementConfig={formElement.config.elementConfig}
+                    value={formElement.config.value}
+                    changed={this.inputChangeHandler}/>
+                ))}
+
+                
                 <Button btnType="Success" clicked={this.orderHandler}>ORDER</Button>
             </form>
         );
