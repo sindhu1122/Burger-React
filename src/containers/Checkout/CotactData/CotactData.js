@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import {connect} from 'react-redux'
 import Button from '../../../components/UI/Button/Button';
 import Loader from '../../../components/UI/loader/loader';
 import classes from './CotactData.css';
@@ -68,7 +68,7 @@ class CotactData extends Component {
         event.preventDefault();
         this.setState( { load: true } );
         const order = {
-            igrediets: this.props.igrediets,
+            igrediets: this.props.igs,
             price: this.props.price,
             
         }
@@ -122,5 +122,11 @@ class CotactData extends Component {
         );
     }
 }
-
-export default CotactData;
+const mapStateToProps=state=>
+{
+    return{
+    igs:state.igrediets,
+    price:state.totalPrice
+}
+}
+export default connect(mapStateToProps)( CotactData);
