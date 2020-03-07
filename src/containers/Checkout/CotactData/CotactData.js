@@ -5,6 +5,8 @@ import Loader from '../../../components/UI/loader/loader';
 import classes from './CotactData.css';
 import axios from '../../../axios-order';
 import Iput from '../../../components/UI/Iput/Iput'
+import * as actio from '../../../store/actions/index'
+import ErrorHadler from '../../../hoc/Errorhadler/Errorhadler'
 class CotactData extends Component {
     state = {
         orderForm:
@@ -16,7 +18,12 @@ class CotactData extends Component {
                         type:'text',
                         placeholder:'Your name'
                     },
-                    value:''
+                    value:'',
+                    validation:{
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 } ,
                 street: {
                     elementType:'input',
@@ -24,7 +31,12 @@ class CotactData extends Component {
                         type:'text',
                         placeholder:'Your street'
                     },
-                    value:''
+                    value:'',
+                    validation:{
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 } ,
                 zipCode: {
                     elementType:'input',
@@ -32,7 +44,15 @@ class CotactData extends Component {
                         type:'text',
                         placeholder:'Your ZIP CODE'
                     },
-                    value:''
+                    value:'',
+                    validation:
+                    {
+                        required:true,
+                        minLength:5,
+                        maxLength:5
+                    },
+                    valid:false,
+                    touched:false
                 } ,
                 country: {
                     elementType:'input',
@@ -40,7 +60,12 @@ class CotactData extends Component {
                         type:'text',
                         placeholder:'Your coutry'
                     },
-                    value:''
+                    value:'',
+                    validation:{
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 } ,
                 email: {
                     elementType:'input',
@@ -48,7 +73,12 @@ class CotactData extends Component {
                         type:'email',
                         placeholder:'Your mail-id'
                     },
-                    value:''
+                    value:'',
+                    validation:{
+                        required:true
+                    },
+                    valid:false,
+                    touched:false
                 } ,
                 deliveryMethod: {
                     elementType:'select',
@@ -58,33 +88,74 @@ class CotactData extends Component {
                        {value:'cheapest',displayValue:'Cheapest'}
                     ]
                     },
-                    value:''
+                    value:'fastest',
+                    valid:true,
+                    validation:{}
                 } ,
 
         },
-        load:false
+        formIsValid: false
     }
     orderHandler = ( event ) => {
         event.preventDefault();
-        this.setState( { load: true } );
+        this.setState( { loading: true } );
+        const formData = {};
+        for (let formElementIdentifier in this.state.orderForm) {
+            formData[formElementIdentifier] = this.state.orderForm[formElementIdentifier].value;
+        }
         const order = {
             igrediets: this.props.igs,
             price: this.props.price,
+            orderData:formData
             
         }
-        axios.post( '/orders.json', order )
-            .then( response => {
-                this.setState( { load: false } );
-                this.props.history.push('/');
-            } )
-            .catch( error => {
-                this.setState( { load: false } );
-            } );
+        this.props.oOrderBurger(order)
+        // axios.post( '/orders.json', order )
+        //     .then( response => {
+        //         this.setState( { load: false } );
+        //         this.props.history.push('/');
+        //     } )
+        //     .catch( error => {
+        //         this.setState( { load: false } );
+        //     } );
     }
-    inputChangeHandler=(event)=>
-    {
+    checkValidity(value, rules) {
+        let isValid = true;
+        
+        if (rules.required) {
+            isValid = value.trim() !== '' && isValid;
+        }
 
+        if (rules.minLength) {
+            isValid = value.length >= rules.minLength && isValid
+        }
+
+        if (rules.maxLength) {
+            isValid = value.length <= rules.maxLength && isValid
+        }
+
+        return isValid;
     }
+
+    inputChangedHandler = (event, inputIdentifier) => {
+        const updatedOrderForm = {
+            ...this.state.orderForm
+        };
+        const updatedFormElement = { 
+            ...updatedOrderForm[inputIdentifier]
+        };
+        updatedFormElement.value = event.target.value;
+        updatedFormElement.valid = this.checkValidity(updatedFormElement.value, updatedFormElement.validation);
+        updatedFormElement.touched = true;
+        updatedOrderForm[inputIdentifier] = updatedFormElement;
+        
+        let formIsValid = true;
+        for (let inputIdentifier in updatedOrderForm) {
+            formIsValid = updatedOrderForm[inputIdentifier].valid && formIsValid;
+        }
+        this.setState({orderForm: updatedOrderForm, formIsValid: formIsValid});
+    }
+
 
     render () {
         const formElementsArray=[];
@@ -96,22 +167,22 @@ class CotactData extends Component {
             })
         }
         let form = (
-            <form>
-                
-                {formElementsArray.map(formElement=>(
+            <form onSubmit={this.orderHandler}>
+                {formElementsArray.map(formElement => (
                     <Iput 
-                    key={formElement.id}
-                    elementType= {formElement.config.elementType}
-                    elementConfig={formElement.config.elementConfig}
-                    value={formElement.config.value}
-                    changed={this.inputChangeHandler}/>
+                        key={formElement.id}
+                        elementType={formElement.config.elementType}
+                        elementConfig={formElement.config.elementConfig}
+                        value={formElement.config.value}
+                        invalid={!formElement.config.valid}
+                        shouldValidate={formElement.config.validation}
+                        touched={formElement.config.touched}
+                        changed={(event) => this.inputChangedHandler(event, formElement.id)} />
                 ))}
-
-                
-                <Button btnType="Success" clicked={this.orderHandler}>ORDER</Button>
+                <Button btnType="Success" disabled={!this.state.formIsValid}>ORDER</Button>
             </form>
         );
-        if ( this.state.load ) {
+        if ( this.props.load ) {
             form = <Loader />;
         }
         return (
@@ -125,8 +196,16 @@ class CotactData extends Component {
 const mapStateToProps=state=>
 {
     return{
-    igs:state.igrediets,
-    price:state.totalPrice
+    igs:state.burgerBuilder.igrediets,
+    price:state.burgerBuilder.totalPrice,
+    load:state.order.load
+
 }
 }
-export default connect(mapStateToProps)( CotactData);
+const mapDispatchToProps=dispatch=>{
+    return{
+    oOrderBurger:(orderData)=>dispatch(actio.purchase(orderData))
+    }
+    
+}
+export default connect(mapStateToProps,mapDispatchToProps)(ErrorHadler( CotactData,axios));

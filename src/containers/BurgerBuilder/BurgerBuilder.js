@@ -8,7 +8,7 @@ import OrderSummary from '../../components/Burger/OrderSummary/OrderSummary'
 import axios from '../../axios-order'
 import Loader from '../../components/UI/loader/loader'
 import Errorhadler from '../../hoc/Errorhadler/Errorhadler'
-import * as actionTypes from '../../store/action'
+import * as actions from '../../store/actions/index'
 
 class BurgerBuilder extends Component
 {
@@ -17,18 +17,12 @@ class BurgerBuilder extends Component
         
        
         purchasing:false,
-        load:false,
-        error:false
+       
     }
     componentDidMount(){
         console.log(this.props)
-        // axios.get('https://react-my-burger-5d54d.firebaseio.com/igrediets.json')
-        // .then(response=>{
-        //     this.setState({igrediets:response.data})
-        // } )
-        // .catch(error=>{
-        //     this.setState({error:true})
-        // })
+        this.props.oIitIgrediets()
+        
     }
     purchaseHandler=()=>
     {
@@ -40,38 +34,7 @@ class BurgerBuilder extends Component
     }
     purchaseContinueHandler=()=>
     {
-    //     //alert("YaaY!")
-    // //     this.setState({load:true})
-    // //     const order=
-    // //     {
-    // //         igrediets:this.state.igrediets,
-    // //         price:this.state.totalPrice,
-    // //         customer:{
-    // //             name:'Mohitha',
-    // //             address:
-    // //             {
-    // //                 street:'x strret',
-    // //                 zipcode:'517503',
-    // //                 country:'India'
-    // //             },
-    // //             email:'moh@gmail.com'
-    // //         },
-    // //         ==ethod:'fastest'
-    // //     }
-    // //     axios.post('/orders.json',order)
-    // //     .then(response=>{
-    // //         this.setState({load:false,purchasing:false})
-    // //     })
-    // //     .catch(error=>{
-    // //         this.setState({load:false,purchasing:false})
-    // //     });
-    // const queryParams=[];
-    // for(let i in this.state.igrediets)
-    // {
-    //     queryParams.push(encodeURIComponent(i)+'='+encodeURIComponent(this.state.igrediets[i]))
-    // }
-    // queryParams.push('price='+this.state.totalPrice)
-    // const queryStrig=queryParams.join('&')
+    this.props.onInitpurchase()
     this.props.history.push('/checkout')
      }
     updatePurchaseState(ingredients)
@@ -84,45 +47,13 @@ class BurgerBuilder extends Component
         },0)
         return sum>0
     }
-    // addIngredientHandler=(type)=>
-    // {
-    //     const count=this.state.igrediets[type];
-    //     const updatecount=count+1
-    //     const updateingredient={
-    //         ...this.state.igrediets
-    //     }
-    //     updateingredient[type]=updatecount;
-    //     const priceAddition=ING_RATE[type]
-    //     const oldPrice=this.state.totalPrice;
-    //     const newPrice=oldPrice+priceAddition
-    //     this.setState({totalPrice:newPrice,igrediets:updateingredient})
-    //     this.updatePurchaseState(updateingredient)
-
-    // }
-    // removeIngredientHandler=(type)=>
-    // {
-    //     const count=this.state.igrediets[type];
-    //     let updatecount=0
-    //     let newPrice=this.state.totalPrice
-    //     if(count>0){
-    //         updatecount=count-1}
-    //     const updateingredient={
-    //         ...this.state.igrediets
-    //     }
-    //     updateingredient[type]=updatecount;
-    //     const priceAddition=ING_RATE[type]
-    //     const oldPrice=this.state.totalPrice;
-    //     if(count>0)
-    //     newPrice=oldPrice-priceAddition
-    //     this.setState({totalPrice:newPrice,igrediets:updateingredient})
-    //     this.updatePurchaseState(updateingredient)
-    // }
+    
     render()
     {
         let orderSummary=null
         
     
-        let burger = this.state.error ? <p>Ingredients can't be loaded!</p> : <Loader />
+        let burger = this.props.error ? <p>Ingredients can't be loaded!</p> : <Loader />
     if(this.props.igs)
     {
         burger=(
@@ -147,10 +78,7 @@ class BurgerBuilder extends Component
         purchaseContinue={this.purchaseContinueHandler}/>
     
     }
-    if(this.state.load)
-        {
-            orderSummary=<Loader/>
-        }
+   
     
         return(
             <Aux>
@@ -165,15 +93,19 @@ class BurgerBuilder extends Component
 const mapStateToProps=state=>
 {
     return{
-        igs:state.igrediets,
-        price:state.totalPrice
+        igs:state.burgerBuilder.igrediets,
+        price:state.burgerBuilder.totalPrice,
+        error:state.burgerBuilder.error
     }
 }
 const mapDispatchToProps= dispatch=>
 {
     return{
-        oIgredietadded:(igame)=>dispatch({type:actionTypes.ADD_INGREDIENT,igredietame:igame}),
-        oIgredietremoved:(igame)=>dispatch({type:actionTypes.REMOVE_INGREDIENT,igredietame:igame})
+        oIgredietadded:(igame)=>dispatch(actions.addIgrediet(igame)),
+        oIgredietremoved:(igame)=>dispatch(actions.removeIgrediet(igame)),
+        oIitIgrediets:()=>dispatch(actions.iitIgrediets()),
+        onInitpurchase:()=>dispatch(actions.purchaseInit())
+
     }
 }
 export default connect(mapStateToProps,mapDispatchToProps )(Errorhadler(BurgerBuilder,axios));
