@@ -106,10 +106,11 @@ class CotactData extends Component {
         const order = {
             igrediets: this.props.igs,
             price: this.props.price,
-            orderData:formData
+            orderData:formData,
+            userId:this.props.useId
             
         }
-        this.props.oOrderBurger(order)
+        this.props.oOrderBurger(order,this.props.token)
         // axios.post( '/orders.json', order )
         //     .then( response => {
         //         this.setState( { load: false } );
@@ -198,13 +199,15 @@ const mapStateToProps=state=>
     return{
     igs:state.burgerBuilder.igrediets,
     price:state.burgerBuilder.totalPrice,
-    load:state.order.load
+    load:state.order.load,
+    token:state.auth.token,
+    useId:state.auth.userId
 
 }
 }
 const mapDispatchToProps=dispatch=>{
     return{
-    oOrderBurger:(orderData)=>dispatch(actio.purchase(orderData))
+    oOrderBurger:(orderData,token)=>dispatch(actio.purchase(orderData,token))
     }
     
 }

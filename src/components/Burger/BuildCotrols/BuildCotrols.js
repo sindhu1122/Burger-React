@@ -20,7 +20,7 @@ const buildCotrols=(props)=>
          ))}
             <button 
             className={classes.OrderButton}
-            disabled={!props.purchaseable} onClick={props.ordered}> CONFIRM ORDER</button>
+            disabled={!props.purchaseable} onClick={props.ordered}> {props.isAuth?'CONFIRM ORDER':'SIGNUP TO ORDER'}</button>
     </div>
 )
 export default buildCotrols;
